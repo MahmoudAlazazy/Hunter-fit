@@ -33,29 +33,33 @@ class TodayTargetCell extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ShaderMask(
-                blendMode: BlendMode.srcIn,
-                shaderCallback: (bounds) {
-                  return LinearGradient(
+              Expanded(
+                child: ShaderMask(
+                  blendMode: BlendMode.srcIn,
+                  shaderCallback: (bounds) {
+                    return LinearGradient(
                           colors: TColor.primaryG,
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight)
                       .createShader(
                           Rect.fromLTRB(0, 0, bounds.width, bounds.height));
-                },
-                child: Text(
-                  value,
-                  style: TextStyle(
-                      color: TColor.white.withOpacity(0.7),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14),
+                  },
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                        color: TColor.white.withOpacity(0.7),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14),
+                  ),
                 ),
               ),
-              Text(
-                title,
-                style: TextStyle(
-                  color: TColor.black,
-                  fontSize: 12,
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: TColor.black,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],

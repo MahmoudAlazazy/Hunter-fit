@@ -20,6 +20,8 @@ class _FriendRequestsScreenState extends State<FriendRequestsScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize with a completed future to prevent LateInitializationError
+    _dataFuture = Future.value();
     // Schedule data loading after the first frame to avoid build phase issues
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();

@@ -358,53 +358,43 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              Text(
-                                _latestSleep != null ? "Last Night Sleep" : "Ideal Hours for Sleep",
-                                style: TextStyle(
-                                  color: TColor.black,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Text(
-                                _latestSleep?.durationFormatted ?? "8hours 30minutes",
-                                style: TextStyle(
-                                    color: TColor.primaryColor2,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              if (_latestSleep != null) ...[
-                                const SizedBox(height: 8),
+                        Flexible(
+                          fit: FlexFit.tight,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
                                 Text(
-                                  "Bedtime: ${_latestSleep!.bedtimeFormatted}",
+                                  _latestSleep != null ? "Last Night Sleep" : "Ideal Hours for Sleep",
                                   style: TextStyle(
-                                    color: TColor.gray,
-                                    fontSize: 12,
+                                    color: TColor.black,
+                                    fontSize: 11,
                                   ),
                                 ),
-                                Text(
-                                  "Wake up: ${_latestSleep!.wakeTimeFormatted}",
-                                  style: TextStyle(
-                                    color: TColor.gray,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                              const Spacer(),
-                              SizedBox(
-                                width: 110,
-                                height: 35,
-                                child: RoundButton(
-                                    title: "Learn More",
-                                    fontSize: 12,
-                                    onPressed: () {}),
-                              )
-                            ]),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _latestSleep?.durationFormatted ?? "8hours 30minutes",
+                                      style: TextStyle(
+                                          color: TColor.primaryColor2,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Container(
+                                      constraints: BoxConstraints(minWidth: 90),
+                                      height: 30,
+                                      child: RoundButton(
+                                          title: "Learn More",
+                                          fontSize: 7,
+                                        onPressed: () {},
+                                      ),
+                                    )
+                                  ],
+                                )
+                              ]
+                            ),
+                        ),
                         Image.asset(
                           "assets/img/sleep_schedule.png",
                           width: media.width * 0.35,
@@ -563,14 +553,10 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                         )
                       ],
                     )),
-                    
                 SizedBox(
                   height: media.width * 0.05,
                 ),
               ],
-            ),
-            SizedBox(
-              height: media.width * 0.05,
             ),
           ],
         ),

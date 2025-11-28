@@ -416,17 +416,17 @@ class _PostCardWidgetState extends State<PostCardWidget> {
                         '$_likeCount',
                         style: TextStyle(
                           color: Colors.grey[600],
-                          fontSize: 13.0,
+                          fontSize: 6.0,
                         ),
                       ),
                     ],
                     const Spacer(),
                     if (widget.post.commentsCount > 0)
                       Text(
-                        '${widget.post.commentsCount} comments',
+                        '${widget.post.commentsCount}comment',
                         style: TextStyle(
                           color: Colors.grey[600],
-                          fontSize: 13.0,
+                          fontSize: 5.0,
                         ),
                       ),
                     if (widget.post.commentsCount > 0 && widget.post.viewsCount > 0)
@@ -434,7 +434,7 @@ class _PostCardWidgetState extends State<PostCardWidget> {
                         ' • ',
                         style: TextStyle(
                           color: Colors.grey[600],
-                          fontSize: 13.0,
+                          fontSize: 6.0,
                         ),
                       ),
                     if (widget.post.viewsCount > 0)
@@ -442,7 +442,7 @@ class _PostCardWidgetState extends State<PostCardWidget> {
                         '${widget.post.viewsCount} views',
                         style: TextStyle(
                           color: Colors.grey[600],
-                          fontSize: 13.0,
+                          fontSize: 6.0,
                         ),
                       ),
                   ],
@@ -475,7 +475,7 @@ class _PostCardWidgetState extends State<PostCardWidget> {
                         widget.post.likesCount > 0 ? '${widget.post.likesCount} Likes' : 'Like',
                         style: TextStyle(
                           color: _isLiked ? Colors.red[400] : Colors.grey[600],
-                          fontSize: 13.0,
+                          fontSize: 9.0,
                         ),
                       ),
                       style: TextButton.styleFrom(
@@ -500,7 +500,7 @@ class _PostCardWidgetState extends State<PostCardWidget> {
                         widget.post.commentsCount > 0 ? '${widget.post.commentsCount} Comments' : 'Comment',
                         style: TextStyle(
                           color: Colors.grey[600],
-                          fontSize: 13.0,
+                          fontSize: 9.0,
                         ),
                       ),
                       style: TextButton.styleFrom(
@@ -525,7 +525,7 @@ class _PostCardWidgetState extends State<PostCardWidget> {
                         'Share',
                         style: TextStyle(
                           color: Colors.grey[600],
-                          fontSize: 13.0,
+                          fontSize: 9.0,
                         ),
                       ),
                       style: TextButton.styleFrom(

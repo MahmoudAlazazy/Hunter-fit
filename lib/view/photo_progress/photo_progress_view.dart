@@ -27,6 +27,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
 
   Future<void> _loadData() async {
     setState(() => loading = true);
+    print('Loading photo progress data...');
     
     try {
       final userId = SupabaseService.getCurrentUserId();
@@ -54,6 +55,10 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
           nextReminderDate = reminder;
           loading = false;
         });
+        print('Loaded ${photoArr.length} photo groups');
+        for (final group in photoArr) {
+          print('Group ${group["time"]}: ${group["photos"]?.length} photos');
+        }
       }
     } catch (e) {
       print('Error loading data: $e');
@@ -118,6 +123,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
               const SnackBar(content: Text('Photo uploaded successfully!')),
             );
             _loadData(); // Refresh data
+            print('Photo uploaded successfully, refreshing data...');
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Failed to save photo')),
@@ -141,6 +147,12 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    
+    // Responsive breakpoint
+    final bool isSmallScreen = media.width < 600;
+    final bool isTabletScreen = media.width >= 600 && media.width < 900;
+    final bool isLargeScreen = media.width >= 900;
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: TColor.white,
@@ -151,7 +163,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
         title: Text(
           "Progress Photo",
           style: TextStyle(
-              color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700),
+              color: TColor.black, fontSize: isSmallScreen ? 14 : 16, fontWeight: FontWeight.w700),
         ),
         actions: [
           InkWell(
@@ -213,18 +225,18 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   "Reminder!",
                                   style: TextStyle(
                                       color: Colors.red,
-                                      fontSize: 12,
+                                      fontSize: isSmallScreen ? 8 : 10,
                                       fontWeight: FontWeight.w500),
                                 ),
                                 Text(
                                   "Next Photos Fall On ${nextReminderDate != null ? '${nextReminderDate!.day} ${_getMonthName(nextReminderDate!.month)}' : 'Loading...'}",
                                   style: TextStyle(
                                       color: TColor.black,
-                                      fontSize: 14,
+                                      fontSize: isSmallScreen ? 10 : 12,
                                       fontWeight: FontWeight.w700),
                                 ),
                               ]),
@@ -259,32 +271,50 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(
-                                height: 15,
+                              SizedBox(
+                                height: isSmallScreen ? 8 : 12,
                               ),
                               Text(
                                 "Track Your Progress Each\nMonth With Photo",
                                 style: TextStyle(
                                   color: TColor.black,
-                                  fontSize: 12,
+                                  fontSize: isSmallScreen ? 8 : 10,
                                 ),
                               ),
-                              const Spacer(),
+                              SizedBox(height: isSmallScreen ? 2 : 3),
                               SizedBox(
-                                width: 110,
-                                height: 35,
+                                width: isSmallScreen ? 75 : 95,
+                                height: isSmallScreen ? 26 : 30,
                                 child: RoundButton(
                                     title: "Learn More",
-                                    fontSize: 12,
+                                    fontSize: isSmallScreen ? 8 : 10,
                                     onPressed: () {}),
                               )
-                            ]),
-                        Image.asset(
-                          "assets/img/progress_each_photo.png",
-                          width: media.width * 0.35,
+                            ],
+                          ),
+                        ),
+                        Flexible(
+                          child: Container(
+                            width: isSmallScreen ? media.width * 0.25 : media.width * 0.35,
+                            height: isSmallScreen ? media.width * 0.25 : media.width * 0.35,
+                            child: Image.asset(
+                              "assets/img/progress_each_photo.png",
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                print('Image error: $error');
+                                return Container(
+                                  width: 50,
+                                  height: 50,
+                                  color: Colors.red.withOpacity(0.3),
+                                  child: Icon(Icons.image_not_supported, color: Colors.red),
+                                );
+                              },
+                            ),
+                          ),
                         )
                       ],
                     ),
@@ -308,7 +338,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                         "Compare my Photo",
                         style: TextStyle(
                             color: TColor.black,
-                            fontSize: 14,
+                            fontSize: isSmallScreen ? 10 : 12,
                             fontWeight: FontWeight.w500),
                       ),
                       SizedBox(
@@ -317,7 +347,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                         child: RoundButton(
                           title: "Compare",
                           type: RoundButtonType.bgGradient,
-                          fontSize: 12,
+                          fontSize: isSmallScreen ? 8 : 10,
                           fontWeight: FontWeight.w400,
                           onPressed: () {
                             Navigator.push(
@@ -392,21 +422,61 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
-                                    child: Image.network(
-                                      imaArr[indexRow]['photo_url'] as String? ?? "",
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Container(
-                                          color: TColor.lightGray,
-                                          child: Icon(
-                                            Icons.broken_image,
-                                            color: TColor.gray,
+                                    child: FutureBuilder<String?>(
+                                    future: SupabaseService.getProgressPhotoUrl(imaArr[indexRow]['photo_url'] as String? ?? ""),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor: AlwaysStoppedAnimation<Color>(TColor.primaryColor1),
                                           ),
                                         );
-                                      },
-                                    ),
+                                      }
+                                      
+                                      final imageUrl = snapshot.data ?? imaArr[indexRow]['photo_url'] as String? ?? "";
+                                      
+                                      return Image.network(
+                                        imageUrl,
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          print('Image load error: $error');
+                                          print('Image URL: $imageUrl');
+                                          return Container(
+                                            color: TColor.lightGray,
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.broken_image,
+                                                  color: TColor.gray,
+                                                  size: 20,
+                                                ),
+                                                Text(
+                                                  'Error',
+                                                  style: TextStyle(
+                                                    fontSize: 8,
+                                                    color: TColor.gray,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) return child;
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(TColor.primaryColor1),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
                                   ),
                                 );
                               }),

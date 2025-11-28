@@ -148,8 +148,8 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                             title: tr('Add', 'إضافة'),
                             type: RoundButtonType.bgGradient,
                             onPressed: () async {
-                              Navigator.pop(context);
                               await _addFoodToDayMeal(f, dayIndex, mealType);
+                              Navigator.pop(context);
                             },
                           ),
                         );
@@ -260,7 +260,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
         title: Text(
           tr('Meal Planner', 'مخطط الوجبات'),
           style: TextStyle(
-              color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700),
+              color: TColor.black, fontSize: 12, fontWeight: FontWeight.w700),
         ),
         actions: [
           InkWell(
@@ -296,8 +296,11 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(tr('Weekly Planner', 'مخطط أسبوعي'), style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
+                      Expanded(
+                        child: Text(tr('Weekly Planner', 'مخطط أسبوعي'), style: TextStyle(color: TColor.black, fontSize: 14, fontWeight: FontWeight.w700), overflow: TextOverflow.ellipsis),
+                      ),
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(onPressed: () async { _weekStart = _weekStart.subtract(const Duration(days: 7)); await _loadWeek(); }, icon: const Icon(Icons.chevron_left)),
                           Text('${_weekStart.month}/${_weekStart.day}'),
@@ -349,7 +352,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(tr(mt[0].toUpperCase() + mt.substring(1), _arabicLabel(mt)), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                                    Text(tr(mt[0].toUpperCase() + mt.substring(1), _arabicLabel(mt)), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                                     RoundButton(title: tr('Add', 'إضافة'), type: RoundButtonType.bgGradient, onPressed: () => _pickFood(_selectedDayIndex, mt)),
                                   ],
                                 ),
@@ -387,10 +390,10 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Text(foodName, style: const TextStyle(fontWeight: FontWeight.w500)),
+                                                Text(foodName, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
                                                 if (brand.isNotEmpty) 
-                                                  Text(brand, style: TextStyle(color: TColor.gray, fontSize: 12)),
-                                                Text('$servings ${tr('servings', 'حصص')}', style: TextStyle(color: TColor.primaryColor2, fontSize: 12)),
+                                                  Text(brand, style: TextStyle(color: TColor.gray, fontSize: 10)),
+                                                Text('$servings ${tr('servings', 'حصص')}', style: TextStyle(color: TColor.primaryColor2, fontSize: 10)),
                                               ],
                                             ),
                                           ),
@@ -407,7 +410,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                                     child: Text(
                                       tr('No items added', 'لا توجد عناصر مضافة'),
-                                      style: TextStyle(color: TColor.gray, fontSize: 14),
+                                      style: TextStyle(color: TColor.gray, fontSize: 12),
                                     ),
                                   ),
                               ],
@@ -431,11 +434,14 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(tr('Daily Meal Schedule', 'جدول اليوم'), style: TextStyle(color: TColor.black, fontSize: 14, fontWeight: FontWeight.w700), overflow: TextOverflow.ellipsis),
+                          Expanded(
+                            child: Text(tr('Daily Meal Schedule', 'جدول اليوم'), style: TextStyle(color: TColor.black, fontSize: 12, fontWeight: FontWeight.w700), overflow: TextOverflow.ellipsis, maxLines: 1),
+                          ),
+                          const SizedBox(width: 8),
                           SizedBox(
-                            width: 90,
+                            width: 60,
                             height: 30,
-                            child: RoundButton(title: tr('Open', 'فتح'), type: RoundButtonType.bgGradient, fontSize: 12, fontWeight: FontWeight.w400, onPressed: () {
+                            child: RoundButton(title: tr('Open', 'فتح'), type: RoundButtonType.bgGradient, fontSize: 10, fontWeight: FontWeight.w400, onPressed: () {
                               Navigator.push(context, MaterialPageRoute(builder: (context) => const MealScheduleView()));
                             }),
                           )
@@ -444,7 +450,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text(tr('Shopping List', 'قائمة التسوق'), style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
+                  Text(tr('Shopping List', 'قائمة التسوق'), style: TextStyle(color: TColor.black, fontSize: 14, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 12),
                   _isLoading 
                     ? Center(
@@ -466,12 +472,12 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                               const SizedBox(height: 8),
                               Text(
                                 tr('No items in shopping list', 'لا توجد عناصر في قائمة التسوق'),
-                                style: TextStyle(color: TColor.gray, fontSize: 14),
+                                style: TextStyle(color: TColor.gray, fontSize: 12),
                                 textAlign: TextAlign.center,
                               ),
                               Text(
                                 tr('Add meals to generate shopping list', 'أضف وجبات لإنشاء قائمة التسوق'),
-                                style: TextStyle(color: TColor.gray, fontSize: 12),
+                                style: TextStyle(color: TColor.gray, fontSize: 10),
                                 textAlign: TextAlign.center,
                               ),
                             ],
@@ -516,11 +522,11 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(s['name'] ?? '-', style: const TextStyle(fontWeight: FontWeight.w500)),
+                                        Text(s['name'] ?? '-', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
                                         const SizedBox(height: 2),
                                         Text(
                                           '${(s['total_servings'] ?? 0.0).toStringAsFixed(1)} ${tr('servings', 'حصص')} • ${grams.toStringAsFixed(0)} g',
-                                          style: TextStyle(color: TColor.gray, fontSize: 12),
+                                          style: TextStyle(color: TColor.gray, fontSize: 10),
                                         ),
                                       ],
                                     ),

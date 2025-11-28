@@ -481,12 +481,15 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "Daily Sleep Schedule",
-                          style: TextStyle(
-                              color: TColor.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700),
+                        Expanded(
+                          child: Text(
+                            "Daily Sleep Schedule",
+                            style: TextStyle(
+                                color: TColor.black,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         SizedBox(
                           width: 70,
@@ -506,7 +509,7 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                               );
                             },
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),

@@ -62,7 +62,7 @@ class _AllSchedulesViewState extends State<AllSchedulesView> {
       case 'ab workout':
         return "assets/img/Workout4.png";
       case 'cardio':
-        return "assets/img/Workout5.png";
+        return "assets/img/Workout1.png";
       case 'strength training':
         return "assets/img/Workout6.png";
       default:

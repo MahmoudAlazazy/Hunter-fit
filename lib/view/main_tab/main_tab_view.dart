@@ -21,13 +21,20 @@ class _MainTabViewState extends State<MainTabView> {
   
   @override
   Widget build(BuildContext context) {
+    var media = MediaQuery.of(context).size;
+    
+    // Responsive breakpoint
+    final bool isSmallScreen = media.width < 600;
+    final bool isTabletScreen = media.width >= 600 && media.width < 900;
+    final bool isLargeScreen = media.width >= 900;
+    
     return Scaffold(
       backgroundColor: TColor.white,
       body: PageStorage(bucket: pageBucket, child: currentTab),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
-        width: 70,
-        height: 70,
+        width: isSmallScreen ? 45 : 55,
+        height: isSmallScreen ? 45 : 55,
         margin: const EdgeInsets.only(top: 10),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -35,7 +42,7 @@ class _MainTabViewState extends State<MainTabView> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
-          borderRadius: BorderRadius.circular(35),
+          borderRadius: BorderRadius.circular(isSmallScreen ? 25 : 30),
           boxShadow: [
             BoxShadow(
               color: TColor.primaryG[0].withOpacity(0.3),
@@ -47,7 +54,7 @@ class _MainTabViewState extends State<MainTabView> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(35),
+            borderRadius: BorderRadius.circular(isSmallScreen ? 25 : 30),
             onTap: () {
               Navigator.push(
                 context,
@@ -59,7 +66,7 @@ class _MainTabViewState extends State<MainTabView> {
             child: Icon(
               Icons.groups ,
               color: TColor.white,
-              size: 32,
+              size: isSmallScreen ? 16 : 18,
             ),
           ),
         ),
@@ -70,11 +77,11 @@ class _MainTabViewState extends State<MainTabView> {
         color: Colors.transparent,
         elevation: 0,
         child: Container(
-          margin: const EdgeInsets.only(left: 5, right: 5, bottom: 5),
-          height: 90,
+          margin: const EdgeInsets.only(left: 3, right: 3, bottom: 3),
+          height: isSmallScreen ? 65 : 70,
           decoration: BoxDecoration(
             color: const Color(0xFF1C1C1E),
-            borderRadius: BorderRadius.circular(36),
+            borderRadius: BorderRadius.circular(isSmallScreen ? 25 : 30),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.3),
@@ -98,7 +105,7 @@ class _MainTabViewState extends State<MainTabView> {
                 index: 1,
                 label: 'Activity',
               ),
-              const SizedBox(width: 60), // مساحة للزر الأوسط
+              SizedBox(width: isSmallScreen ? 35 : 40), // مساحة للزر الأوسط
               _buildNavItem(
                 icon: Icons.photo_camera,
                 selectedIcon: Icons.photo_camera,
@@ -125,10 +132,12 @@ class _MainTabViewState extends State<MainTabView> {
     required String label,
   }) {
     final isSelected = selectTab == index;
+    var media = MediaQuery.of(context).size;
+    final bool isSmallScreen = media.width < 600;
     
     return Expanded(
       child: InkWell(
-        borderRadius: BorderRadius.circular(36),
+        borderRadius: BorderRadius.circular(isSmallScreen ? 20 : 30),
         onTap: () {
           setState(() {
             selectTab = index;
@@ -149,28 +158,34 @@ class _MainTabViewState extends State<MainTabView> {
           });
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 6 : 8, vertical: isSmallScreen ? 4 : 6),
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFF5B67F5) : Colors.transparent,
-            borderRadius: BorderRadius.circular(36),
+            borderRadius: BorderRadius.circular(isSmallScreen ? 20 : 30),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                isSelected ? selectedIcon : icon,
-                color: isSelected ? Colors.white : Colors.grey[400],
-                size: 24,
+              Flexible(
+                child: Icon(
+                  isSelected ? selectedIcon : icon,
+                  color: isSelected ? Colors.white : Colors.grey[400],
+                  size: isSmallScreen ? 16 : 18,
+                ),
               ),
               if (isSelected) ...[
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                SizedBox(width: isSmallScreen ? 2 : 3),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isSmallScreen ? 8 : 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],

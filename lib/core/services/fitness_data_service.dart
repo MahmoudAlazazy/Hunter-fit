@@ -241,6 +241,15 @@ class FitnessDataService {
     }
   }
 
+  static Future<int> getTotalWaterIntakeForDate(String userId, DateTime date) async {
+    try {
+      return await _nutritionRepo.getTotalWaterIntakeForDate(userId, date);
+    } catch (e) {
+      print('Error fetching total water intake for date: $e');
+      return 0;
+    }
+  }
+
   // Water Goal (local storage for now)
   static const String _kWaterGoalLitersKey = 'daily_water_goal_liters';
 

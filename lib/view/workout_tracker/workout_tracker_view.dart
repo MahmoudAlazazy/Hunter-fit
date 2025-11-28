@@ -21,12 +21,15 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   WorkoutRepository? _workoutRepository;
   List latestArr = [];
   bool _isLoadingSchedules = false;
+  List<Map<String, dynamic>> _chartData = [];
+  bool _isLoadingChartData = false;
 
   @override
   void initState() {
     super.initState();
     _workoutRepository = WorkoutRepository();
     _loadScheduledWorkouts();
+    _loadChartData();
   }
 
   Future<void> _loadScheduledWorkouts() async {
@@ -82,6 +85,67 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     }
   }
 
+  Future<void> _loadChartData() async {
+    setState(() {
+      _isLoadingChartData = true;
+    });
+
+    try {
+      final userId = SupabaseService.getCurrentUserId();
+      if (userId != null) {
+        // Get workout schedules for the last 7 days
+        final now = DateTime.now();
+        final weekAgo = now.subtract(Duration(days: 7));
+        
+        final response = await SupabaseService.client
+            .from('workout_schedules')
+            .select()
+            .eq('user_id', userId)
+            .gte('scheduled_date', weekAgo.toIso8601String())
+            .lte('scheduled_date', now.toIso8601String())
+            .order('scheduled_date', ascending: true);
+        
+        // Group by day and count workouts
+        final Map<String, int> dailyWorkoutCount = {};
+        for (final schedule in response) {
+          final date = DateTime.parse(schedule['scheduled_date']);
+          final dateKey = '${date.year}-${date.month}-${date.day}';
+          dailyWorkoutCount[dateKey] = (dailyWorkoutCount[dateKey] ?? 0) + 1;
+        }
+        
+        // Generate chart data for the last 7 days
+        final chartData = <Map<String, dynamic>>[];
+        for (int i = 6; i >= 0; i--) {
+          final date = now.subtract(Duration(days: i));
+          final dateKey = '${date.year}-${date.month}-${date.day}';
+          final count = dailyWorkoutCount[dateKey] ?? 0;
+          
+          chartData.add({
+            'day': _getDayName(date.weekday),
+            'count': count,
+            'date': date,
+          });
+        }
+        
+        print('Generated chart data: ${chartData.length} days');
+        setState(() {
+          _chartData = chartData;
+        });
+      }
+    } catch (e) {
+      print('Error loading chart data: $e');
+    } finally {
+      setState(() {
+        _isLoadingChartData = false;
+      });
+    }
+  }
+
+  String _getDayName(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[weekday - 1];
+  }
+
   String _getWorkoutImage(String workoutId) {
     switch (workoutId.toLowerCase()) {
       case 'upperbody':
@@ -93,7 +157,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       case 'ab workout':
         return "assets/img/Workout4.png";
       case 'cardio':
-        return "assets/img/Workout5.png";
+        return "assets/img/Workout1.png";
       case 'strength training':
         return "assets/img/Workout6.png";
       default:
@@ -125,6 +189,12 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    
+    // Responsive breakpoint
+    final bool isSmallScreen = media.width < 600;
+    final bool isTabletScreen = media.width >= 600 && media.width < 900;
+    final bool isLargeScreen = media.width >= 900;
+    
     return Container(
       decoration:
           BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
@@ -328,20 +398,22 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "Daily Workout Schedule",
-                          style: TextStyle(
-                              color: TColor.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700),
+                        Expanded(
+                          child: Text(
+                            "Daily Workout Schedule",
+                            style: TextStyle(
+                                color: TColor.black,
+                                fontSize: isSmallScreen ? 10 : 12,
+                                fontWeight: FontWeight.w700),
+                          ),
                         ),
                         SizedBox(
-                          width: 70,
-                          height: 25,
+                          width: isSmallScreen ? 60 : 70,
+                          height: isSmallScreen ? 22 : 25,
                           child: RoundButton(
                             title: "Check",
                             type: RoundButtonType.bgGradient,
-                            fontSize: 12,
+                            fontSize: isSmallScreen ? 10 : 12,
                             fontWeight: FontWeight.w400,
                             onPressed: () {
                               Navigator.push(
@@ -367,12 +439,14 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Upcoming Workout",
-                        style: TextStyle(
-                            color: TColor.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700),
+                      Expanded(
+                        child: Text(
+                          "Upcoming Workout",
+                          style: TextStyle(
+                              color: TColor.black,
+                              fontSize: isSmallScreen ? 12 : 14,
+                              fontWeight: FontWeight.w700),
+                        ),
                       ),
                       TextButton(
                         onPressed: () {
@@ -387,7 +461,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                           "See More",
                           style: TextStyle(
                               color: TColor.gray,
-                              fontSize: 14,
+                              fontSize: isSmallScreen ? 10 : 12,
                               fontWeight: FontWeight.w700),
                         ),
                       )
@@ -491,10 +565,49 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         ),
       );
 
-  List<LineChartBarData> get lineBarsData1 => [
-        lineChartBarData1_1,
-        lineChartBarData1_2,
-      ];
+  List<LineChartBarData> get lineBarsData1 {
+    if (_chartData.isEmpty) {
+      return [lineChartBarData1_1, lineChartBarData1_2];
+    }
+    
+    // Generate real data points
+    final spots = _chartData.asMap().entries.map((entry) {
+      return FlSpot(
+        (entry.key + 1).toDouble(),
+        (entry.value['count'] as int).toDouble(),
+      );
+    }).toList();
+    
+    return [
+      LineChartBarData(
+        isCurved: true,
+        color: TColor.white,
+        barWidth: 4,
+        isStrokeCapRound: true,
+        dotData: FlDotData(
+          show: true,
+          getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+            radius: 4,
+            color: TColor.white,
+            strokeWidth: 2,
+            strokeColor: TColor.primaryColor1,
+          ),
+        ),
+        belowBarData: BarAreaData(
+          show: true,
+          gradient: LinearGradient(
+            colors: [
+              TColor.primaryColor1.withOpacity(0.3),
+              TColor.primaryColor2.withOpacity(0.1),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        spots: spots,
+      ),
+    ];
+  }
 
   LineChartBarData get lineChartBarData1_1 => LineChartBarData(
         isCurved: true,
@@ -542,36 +655,37 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       );
 
   Widget rightTitleWidgets(double value, TitleMeta meta) {
-    String text;
-    switch (value.toInt()) {
-      case 0:
-        text = '0%';
-        break;
-      case 20:
-        text = '20%';
-        break;
-      case 40:
-        text = '40%';
-        break;
-      case 60:
-        text = '60%';
-        break;
-      case 80:
-        text = '80%';
-        break;
-      case 100:
-        text = '100%';
-        break;
-      default:
-        return Container();
+    if (_chartData.isEmpty) {
+      // Default values when no data
+      switch (value.toInt()) {
+        case 0:
+          return const Text('0');
+        case 1:
+          return const Text('1');
+        case 2:
+          return const Text('2');
+        case 3:
+          return const Text('3');
+        default:
+          return const SizedBox.shrink();
+      }
     }
-
-    return Text(text,
+    
+    // Use real data
+    final index = value.toInt() - 1;
+    if (index >= 0 && index < _chartData.length) {
+      final count = _chartData[index]['count'] as int;
+      return Text(
+        count.toString(),
         style: TextStyle(
           color: TColor.white,
-          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          fontSize: 10,
         ),
-        textAlign: TextAlign.center);
+      );
+    }
+    
+    return const SizedBox.shrink();
   }
 
   SideTitles get bottomTitles => SideTitles(
@@ -586,38 +700,36 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       color: TColor.white,
       fontSize: 12,
     );
-    Widget text;
-    switch (value.toInt()) {
-      case 1:
-        text = Text('Sun', style: style);
-        break;
-      case 2:
-        text = Text('Mon', style: style);
-        break;
-      case 3:
-        text = Text('Tue', style: style);
-        break;
-      case 4:
-        text = Text('Wed', style: style);
-        break;
-      case 5:
-        text = Text('Thu', style: style);
-        break;
-      case 6:
-        text = Text('Fri', style: style);
-        break;
-      case 7:
-        text = Text('Sat', style: style);
-        break;
-      default:
-        text = const Text('');
-        break;
+    
+    if (_chartData.isEmpty) {
+      // Default values when no data
+      switch (value.toInt()) {
+        case 1:
+          return Text('Sun', style: style);
+        case 2:
+          return Text('Mon', style: style);
+        case 3:
+          return Text('Tue', style: style);
+        case 4:
+          return Text('Wed', style: style);
+        case 5:
+          return Text('Thu', style: style);
+        case 6:
+          return Text('Fri', style: style);
+        case 7:
+          return Text('Sat', style: style);
+        default:
+          return const SizedBox.shrink();
+      }
     }
-
-    return SideTitleWidget(
-      axisSide: meta.axisSide,
-      space: 10,
-      child: text,
-    );
+    
+    // Use real data
+    final index = value.toInt() - 1;
+    if (index >= 0 && index < _chartData.length) {
+      final day = _chartData[index]['day'] as String;
+      return Text(day, style: style);
+    }
+    
+    return const SizedBox.shrink();
   }
 }

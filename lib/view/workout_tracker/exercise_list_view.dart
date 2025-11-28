@@ -419,35 +419,41 @@ class _ExerciseListViewState extends State<ExerciseListView> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: _getDifficultyColor(exercise.difficulty).withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          _getDifficultyText(exercise.difficulty),
-                          style: TextStyle(
-                            color: _getDifficultyColor(exercise.difficulty),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: _getDifficultyColor(exercise.difficulty).withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            _getDifficultyText(exercise.difficulty),
+                            style: TextStyle(
+                              color: _getDifficultyColor(exercise.difficulty),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       if (exercise.equipment != null && exercise.equipment != 'None (Bodyweight)')
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: TColor.gray.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            exercise.equipment!,
-                            style: TextStyle(
-                              color: TColor.gray,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: TColor.gray.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              exercise.equipment!,
+                              style: TextStyle(
+                                color: TColor.gray,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
@@ -457,11 +463,14 @@ class _ExerciseListViewState extends State<ExerciseListView> {
                   Row(
                     children: [
                       if (exercise.sets != null)
-                        Text(
-                          "${exercise.sets} sets",
-                          style: TextStyle(
-                            color: TColor.gray,
-                            fontSize: 11,
+                        Flexible(
+                          child: Text(
+                            "${exercise.sets} sets",
+                            style: TextStyle(
+                              color: TColor.gray,
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       if (exercise.sets != null && exercise.reps != null)
@@ -473,19 +482,25 @@ class _ExerciseListViewState extends State<ExerciseListView> {
                           ),
                         ),
                       if (exercise.reps != null)
-                        Text(
-                          "${exercise.reps} reps",
-                          style: TextStyle(
-                            color: TColor.gray,
-                            fontSize: 11,
+                        Flexible(
+                          child: Text(
+                            "${exercise.reps} reps",
+                            style: TextStyle(
+                              color: TColor.gray,
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       if (exercise.durationSeconds != null)
-                        Text(
-                          "${exercise.durationSeconds}s",
-                          style: TextStyle(
-                            color: TColor.gray,
-                            fontSize: 11,
+                        Flexible(
+                          child: Text(
+                            "${exercise.durationSeconds}s",
+                            style: TextStyle(
+                              color: TColor.gray,
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                     ],

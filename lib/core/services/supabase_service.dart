@@ -295,8 +295,23 @@ class SupabaseService {
         ),
       );
       
-      final response = _client.storage.from('progress_photos').getPublicUrl(path);
-      print('Upload successful, public URL: $response');
+      // Try to get signed URL instead of public URL to bypass RLS issues
+      String? response;
+      try {
+        response = _client.storage.from('progress_photos').getPublicUrl(path);
+        print('Public URL: $response');
+      } catch (e) {
+        print('Error getting public URL: $e');
+        // Fallback to signed URL
+        try {
+          final signedUrl = await _client.storage.from('progress_photos').createSignedUrl(path, 31536000); // 1 year expiry
+          response = signedUrl;
+          print('Signed URL: $response');
+        } catch (e2) {
+          print('Error creating signed URL: $e2');
+          return null;
+        }
+      }
       return response;
     } catch (e) {
       print('Error uploading photo: $e');
@@ -352,6 +367,37 @@ class SupabaseService {
     } catch (e) {
       print('Error deleting photo: $e');
       return false;
+    }
+  }
+
+  static Future<String?> getProgressPhotoUrl(String photoUrl) async {
+    try {
+      print('Converting URL to signed URL: $photoUrl');
+      
+      // Extract path from the public URL
+      final uri = Uri.parse(photoUrl);
+      final pathSegments = uri.pathSegments;
+      
+      // Find the index where 'progress_photos' appears
+      int progressPhotosIndex = pathSegments.indexOf('progress_photos');
+      if (progressPhotosIndex != -1 && progressPhotosIndex + 1 < pathSegments.length) {
+        // Get the path after 'progress_photos'
+        final path = pathSegments.sublist(progressPhotosIndex + 1).join('/');
+        print('Extracted path: $path');
+        
+        // Try to create a signed URL
+        final signedUrl = await _client.storage.from('progress_photos').createSignedUrl(path, 31536000); // 1 year expiry
+        print('Generated signed URL for path: $path');
+        print('Signed URL: $signedUrl');
+        return signedUrl;
+      }
+      
+      // Fallback to original URL if we can't extract path
+      print('Could not extract path from URL, returning original: $photoUrl');
+      return photoUrl;
+    } catch (e) {
+      print('Error creating signed URL for existing photo: $e');
+      return photoUrl; // Return original URL as fallback
     }
   }
 

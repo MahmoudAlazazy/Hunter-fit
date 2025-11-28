@@ -77,86 +77,6 @@ class _LoginViewState extends State<LoginView> {
                             children: [
                               const SizedBox(height: 20),
                               
-                              // Email verification reminder
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            "New user? Please check your email for verification link before logging in.",
-                                            style: TextStyle(
-                                              color: Colors.blue[800],
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: TextButton(
-                                        onPressed: () async {
-                                          final email = _emailController.text.trim();
-                                          if (email.isEmpty) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('أدخل البريد الإلكتروني أولاً')),
-                                            );
-                                            return;
-                                          }
-                                          try {
-                                            // Try to get user to resend confirmation
-                                            final res = await SupabaseService.signInWithEmail(
-                                              email: email, 
-                                              password: 'temp' // This will fail but we can catch the error
-                                            );
-                                            if (res.user != null) {
-                                              await SupabaseService.resendEmailConfirmation();
-                                              await SupabaseService.signOut();
-                                            }
-                                          } catch (e) {
-                                            // Expected to fail, but we can still try to resend
-                                            try {
-                                              await SupabaseService.resendEmailConfirmationForEmail(email);
-                                              if (!mounted) return;
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(content: Text('تم إعادة إرسال رابط التحقق')),
-                                              );
-                                            } catch (e2) {
-                                              if (!mounted) return;
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('خطأ: $e2')),
-                                              );
-                                            }
-                                          }
-                                        },
-                                        child: Text(
-                                          "إعادة إرسال رابط التحقق",
-                                          style: TextStyle(
-                                            color: Colors.blue[700],
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              
-                              const SizedBox(height: 20),
-                              
                               // Email field
                               const Text(
                                 "Email",
@@ -350,37 +270,36 @@ class _LoginViewState extends State<LoginView> {
                               
                               // Sign up section
                               Center(
-                              child: Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    Text(
-      "Dont have an account?",
-      style: TextStyle(
-        color: Colors.grey[600],
-        fontSize: 14,
-      ),
-    ),
-    TextButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const SignUpView(),
-          ),
-        );
-      },
-      child: const Text(
-        "Sign Up",
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
-  ],
-),
-
+                                child: Wrap(
+                                  alignment: WrapAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Dont have an account?",
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const SignUpView(),
+                                          ),
+                                        );
+                                      },
+                                      child: const Text(
+                                        "Sign Up",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               
                               const SizedBox(height: 10),

@@ -34,16 +34,25 @@ class _SelectWorkoutGroupDialogState extends State<SelectWorkoutGroupDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Select Workout Group",
-                  style: TextStyle(
-                    color: TColor.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                Expanded(
+                  child: Text(
+                    "Select Workout Group",
+                    style: TextStyle(
+                      color: TColor.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 IconButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        Navigator.pop(context);
+                      }
+                    });
+                  },
                   icon: Icon(Icons.close, color: TColor.gray),
                 ),
               ],
@@ -120,7 +129,13 @@ class _SelectWorkoutGroupDialogState extends State<SelectWorkoutGroupDialog> {
 
   Widget _buildWorkoutGroupCard(WorkoutGroupModel group) {
     return InkWell(
-      onTap: () => Navigator.pop(context, group),
+      onTap: () {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            Navigator.pop(context, group);
+          }
+        });
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(15),
@@ -193,37 +208,55 @@ class _SelectWorkoutGroupDialogState extends State<SelectWorkoutGroupDialog> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(
-                        Icons.list,
-                        size: 16,
-                        color: TColor.gray,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        "${group.totalExercises} exercises",
-                        style: TextStyle(
-                          color: TColor.gray,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                      Flexible(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.list,
+                              size: 16,
+                              color: TColor.gray,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                "${group.totalExercises} exercises",
+                                style: TextStyle(
+                                  color: TColor.gray,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Icon(
-                        Icons.check_circle,
-                        size: 16,
-                        color: group.completionProgress > 0 
-                            ? Colors.green 
-                            : TColor.gray,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        "${(group.completionProgress * 100).toInt()}% complete",
-                        style: TextStyle(
-                          color: group.completionProgress > 0 
-                              ? Colors.green 
-                              : TColor.gray,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              size: 16,
+                              color: group.completionProgress > 0 
+                                  ? Colors.green 
+                                  : TColor.gray,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                "${(group.completionProgress * 100).toInt()}% complete",
+                                style: TextStyle(
+                                  color: group.completionProgress > 0 
+                                      ? Colors.green 
+                                      : TColor.gray,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -245,13 +278,17 @@ class _SelectWorkoutGroupDialogState extends State<SelectWorkoutGroupDialog> {
   }
 
   Future<void> _createNewGroup() async {
-    final newGroup = await showDialog<WorkoutGroupModel>(
-      context: context,
-      builder: (context) => const CreateWorkoutGroupDialog(),
-    );
-
-    if (newGroup != null) {
-      Navigator.pop(context, newGroup);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        showDialog<WorkoutGroupModel>(
+          context: context,
+          builder: (context) => const CreateWorkoutGroupDialog(),
+        ).then((newGroup) {
+          if (newGroup != null && mounted) {
+            Navigator.pop(context, newGroup);
+          }
+        });
+      }
+    });
   }
 }

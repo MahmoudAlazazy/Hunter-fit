@@ -93,7 +93,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
       backgroundColor: TColor.white,
       body: Container(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        child: SingleChildScrollView(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(
             children: [
               Image.asset(
@@ -145,8 +146,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
             style: TextStyle(
                 color: TColor.black, fontSize: 14, fontWeight: FontWeight.w500),
           ),
-          SizedBox(
-            height: media.width * 0.35,
+          Container(
+            height: 200,
             child: CupertinoDatePicker(
               onDateTimeChanged: (newDate) {
                 setState(() {
@@ -211,7 +212,9 @@ class _AddScheduleViewState extends State<AddScheduleView> {
               onPressed: () {
                 _showWeightsDialog();
               }),
-          const Spacer(),
+          const SizedBox(
+            height: 30,
+          ),
           RoundButton(
             title: _isLoading ? "Saving..." : "Save", 
             onPressed: _isLoading ? null : _saveSchedule
@@ -221,6 +224,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           ),
         ]),
       ),
+    ),
     );
   }
 

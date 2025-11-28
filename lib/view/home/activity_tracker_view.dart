@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../common/colo_extension.dart';
 import '../../core/services/fitness_data_service.dart';
@@ -16,16 +17,53 @@ class ActivityTrackerView extends StatefulWidget {
 class _ActivityTrackerViewState extends State<ActivityTrackerView> {
     int touchedIndex = -1;
     double _waterGoalLiters = 4.0;
+    List<int> _weeklyWaterIntake = [0, 0, 0, 0, 0, 0, 0]; // Last 7 days
+    bool _isLoadingWaterData = true;
 
     @override
     void initState() {
       super.initState();
       _loadWaterGoal();
+      _loadWeeklyWaterData();
     }
 
     Future<void> _loadWaterGoal() async {
       final goal = await FitnessDataService.getDailyWaterGoalLiters();
       if (mounted) setState(() => _waterGoalLiters = goal);
+    }
+
+    Future<void> _loadWeeklyWaterData() async {
+      if (!mounted) return;
+      
+      setState(() => _isLoadingWaterData = true);
+      
+      try {
+        final userId = Supabase.instance.client.auth.currentUser?.id;
+        if (userId == null) {
+          if (mounted) setState(() => _isLoadingWaterData = false);
+          return;
+        }
+
+        final now = DateTime.now();
+        final weeklyData = <int>[0, 0, 0, 0, 0, 0, 0];
+        
+        // Get water intake for the last 7 days
+        for (int i = 0; i < 7; i++) {
+          final date = now.subtract(Duration(days: 6 - i)); // Start from 6 days ago
+          final totalMl = await FitnessDataService.getTotalWaterIntakeForDate(userId, date);
+          weeklyData[i] = totalMl;
+        }
+        
+        if (mounted) {
+          setState(() {
+            _weeklyWaterIntake = weeklyData;
+            _isLoadingWaterData = false;
+          });
+        }
+      } catch (e) {
+        print('Error loading weekly water data: $e');
+        if (mounted) setState(() => _isLoadingWaterData = false);
+      }
     }
 
     Future<void> _showWaterGoalDialog() async {
@@ -46,7 +84,10 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                 final val = double.tryParse(controller.text.replaceAll(',', '.'));
                 if (val != null && val > 0 && val < 20) {
                   await FitnessDataService.setDailyWaterGoalLiters(val);
-                  if (mounted) setState(() => _waterGoalLiters = val);
+                  if (mounted) {
+                    setState(() => _waterGoalLiters = val);
+                    _loadWeeklyWaterData(); // Refresh chart data
+                  }
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('تم ضبط الهدف إلى $val لتر')),
@@ -107,6 +148,25 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
               color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700),
         ),
         actions: [
+          InkWell(
+            onTap: () {
+              _loadWeeklyWaterData();
+            },
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              height: 40,
+              width: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: TColor.lightGray,
+                  borderRadius: BorderRadius.circular(10)),
+              child: Icon(
+                Icons.refresh,
+                size: 20,
+                color: TColor.black,
+              ),
+            ),
+          ),
           InkWell(
             onTap: () {},
             child: Container(
@@ -217,12 +277,14 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Activity  Progress",
-                    style: TextStyle(
-                        color: TColor.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700),
+                  Expanded(
+                    child: Text(
+                      "Activity  Progress",
+                      style: TextStyle(
+                          color: TColor.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700),
+                    ),
                   ),
                   Container(
                       height: 30,
@@ -268,7 +330,13 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                     boxShadow: const [
                       BoxShadow(color: Colors.black12, blurRadius: 3)
                     ]),
-                    child: BarChart(
+                    child: _isLoadingWaterData 
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: TColor.primaryColor1,
+                            ),
+                          )
+                        : BarChart(
                       
                       BarChartData(
                   barTouchData: BarTouchData(
@@ -311,11 +379,19 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                           ),
                           children: <TextSpan>[
                             TextSpan(
-                              text: (rod.toY - 1).toString(),
+                              text: '${(_weeklyWaterIntake[group.x.toInt()] / 1000).toStringAsFixed(1)}L',
                               style: TextStyle(
                                 color: TColor.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '/${_waterGoalLiters.toStringAsFixed(1)}L',
+                              style: TextStyle(
+                                color: TColor.white.withOpacity(0.7),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                           ],
@@ -450,24 +526,9 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
     );
   }
    List<BarChartGroupData> showingGroups() => List.generate(7, (i) {
-        switch (i) {
-          case 0:
-            return makeGroupData(0, 5, TColor.primaryG , isTouched: i == touchedIndex);
-          case 1:
-            return makeGroupData(1, 10.5, TColor.secondaryG, isTouched: i == touchedIndex);
-          case 2:
-            return makeGroupData(2, 5, TColor.primaryG , isTouched: i == touchedIndex);
-          case 3:
-            return makeGroupData(3, 7.5, TColor.secondaryG, isTouched: i == touchedIndex);
-          case 4:
-            return makeGroupData(4, 15, TColor.primaryG , isTouched: i == touchedIndex);
-          case 5:
-            return makeGroupData(5, 5.5, TColor.secondaryG, isTouched: i == touchedIndex);
-          case 6:
-            return makeGroupData(6, 8.5, TColor.primaryG , isTouched: i == touchedIndex);
-          default:
-            return throw Error();
-        }
+        final waterAmount = _weeklyWaterIntake[i] / 1000; // Convert to liters
+        final color = i % 2 == 0 ? TColor.primaryG : TColor.secondaryG;
+        return makeGroupData(i, waterAmount, color, isTouched: i == touchedIndex);
       });
 
     BarChartGroupData makeGroupData(
@@ -493,7 +554,7 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
               : const BorderSide(color: Colors.white, width: 0),
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
-            toY: 20,
+            toY: _waterGoalLiters,
             color: TColor.lightGray,
           ),
         ),

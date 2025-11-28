@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
+import '../../core/models/workout_group_model.dart';
+import '../../core/services/workout_group_service.dart';
 
 class CreateWorkoutGroupDialog extends StatefulWidget {
   final String? suggestedName;
@@ -43,10 +45,11 @@ class _CreateWorkoutGroupDialogState extends State<CreateWorkoutGroupDialog> {
           color: TColor.white,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Text(
               "Create Workout Group",
               style: TextStyle(
@@ -128,7 +131,11 @@ class _CreateWorkoutGroupDialogState extends State<CreateWorkoutGroupDialog> {
                     title: "Cancel",
                     type: RoundButtonType.text,
                     onPressed: () {
-                      Navigator.pop(context);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          Navigator.pop(context);
+                        }
+                      });
                     },
                   ),
                 ),
@@ -136,7 +143,7 @@ class _CreateWorkoutGroupDialogState extends State<CreateWorkoutGroupDialog> {
                 Expanded(
                   child: RoundButton(
                     title: "Create",
-                    onPressed: () {
+                    onPressed: () async {
                       if (_nameController.text.trim().isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -147,16 +154,67 @@ class _CreateWorkoutGroupDialogState extends State<CreateWorkoutGroupDialog> {
                         return;
                       }
                       
-                      Navigator.pop(context, {
-                        'name': _nameController.text.trim(),
-                        'description': _descriptionController.text.trim(),
-                      });
+                      try {
+                        // Show loading indicator
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                        
+                        // Create a new WorkoutGroupModel with proper ID
+                        final newGroup = WorkoutGroupModel(
+                          id: WorkoutGroupService().generateGroupId(),
+                          name: _nameController.text.trim(),
+                          description: _descriptionController.text.trim().isEmpty 
+                              ? null 
+                              : _descriptionController.text.trim(),
+                          exercises: [], // Start with empty exercises list
+                          createdDate: DateTime.now(),
+                          lastModifiedDate: DateTime.now(),
+                        );
+                        
+                        // Save to database
+                        await WorkoutGroupService().saveWorkoutGroup(newGroup);
+                        
+                        // Close loading indicator
+                        Navigator.pop(context);
+                        
+                        // Show success message
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Workout group "${newGroup.name}" created successfully!'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                        
+                        // Close dialog and return the new group
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) {
+                            Navigator.pop(context, newGroup);
+                          }
+                        });
+                      } catch (e) {
+                        // Close loading indicator
+                        Navigator.pop(context);
+                        
+                        // Show error message
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error creating workout group: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     },
                   ),
                 ),
               ],
             ),
           ],
+          ),
         ),
       ),
     );
