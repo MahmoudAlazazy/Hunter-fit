@@ -395,7 +395,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                                             ),
                                           ),
                                           IconButton(
-                                            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                                            icon: Icon(Icons.delete_outline, color: Colors.red, size: 20),
                                             onPressed: () async => await _deleteMealItem(item['id']),
                                           ),
                                         ],
@@ -430,7 +430,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(tr('Daily Meal Schedule', 'جدول اليوم'), style: TextStyle(color: TColor.black, fontSize: 14, fontWeight: FontWeight.w700)),
+                        Text(tr('Daily Meal Schedule', 'جدول اليوم'), style: TextStyle(color: TColor.black, fontSize: 14, fontWeight: FontWeight.w700), overflow: TextOverflow.ellipsis),
                         SizedBox(
                           width: 90,
                           height: 30,

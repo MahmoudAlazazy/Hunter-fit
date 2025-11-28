@@ -111,12 +111,12 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                           ],
                         ),
                       ),
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'delete',
                         child: Row(
                           children: [
                             Icon(Icons.delete, size: 16, color: Colors.red),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text('Delete', style: TextStyle(color: Colors.red)),
                           ],
                         ),
@@ -231,7 +231,7 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Alarm'),
+        title: Text('Delete Alarm'),
         content: Text('Are you sure you want to delete "${widget.sObj["name"]}"?'),
         actions: [
           TextButton(
@@ -251,7 +251,7 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
               // Notify parent to refresh
               widget.onAlarmUpdated?.call();
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

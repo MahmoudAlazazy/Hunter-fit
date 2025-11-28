@@ -126,7 +126,7 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
       final totalMinutes = hours * 60 + minutes;
       
       // Calculate progress ratio (8 hours = 480 minutes is ideal)
-      const idealSleep = 480; // 8 hours in minutes
+      final idealSleep = 480; // 8 hours in minutes
       final ratio = (totalMinutes / idealSleep).clamp(0.0, 1.0);
       final percentage = (ratio * 100).round();
       

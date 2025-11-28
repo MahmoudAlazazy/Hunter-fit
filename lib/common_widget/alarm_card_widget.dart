@@ -212,8 +212,8 @@ class _AlarmCardWidgetState extends State<AlarmCardWidget> {
         widget.onAlarmUpdated?.call();
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to duplicate alarm'),
+          SnackBar(
+            content: const Text('Failed to duplicate alarm'),
             backgroundColor: Colors.red,
           ),
         );
@@ -374,12 +374,12 @@ class _AlarmCardWidgetState extends State<AlarmCardWidget> {
                   ],
                 ),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'delete',
                 child: Row(
                   children: [
                     Icon(Icons.delete, size: 16, color: Colors.red),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text('Delete', style: TextStyle(color: Colors.red)),
                   ],
                 ),

@@ -40,9 +40,9 @@ class RoundButton extends StatelessWidget {
       child: MaterialButton(
         onPressed: onPressed,
         height: 50,
+        minWidth: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         textColor: TColor.primaryColor1,
-        minWidth: double.maxFinite,
         elevation: type == RoundButtonType.bgGradient ||  type == RoundButtonType.bgSGradient ? 0 : elevation,
         color: type == RoundButtonType.bgGradient ||  type == RoundButtonType.bgSGradient
             ? Colors.transparent
