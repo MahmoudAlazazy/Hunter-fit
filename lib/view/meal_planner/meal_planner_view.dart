@@ -425,20 +425,22 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                   ),
                   const SizedBox(height: 24),
                   Container(
-                    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                     decoration: BoxDecoration(color: TColor.primaryColor2.withOpacity(0.3), borderRadius: BorderRadius.circular(15)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(tr('Daily Meal Schedule', 'جدول اليوم'), style: TextStyle(color: TColor.black, fontSize: 14, fontWeight: FontWeight.w700), overflow: TextOverflow.ellipsis),
-                        SizedBox(
-                          width: 90,
-                          height: 30,
-                          child: RoundButton(title: tr('Open', 'فتح'), type: RoundButtonType.bgGradient, fontSize: 12, fontWeight: FontWeight.w400, onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const MealScheduleView()));
-                          }),
-                        )
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(tr('Daily Meal Schedule', 'جدول اليوم'), style: TextStyle(color: TColor.black, fontSize: 14, fontWeight: FontWeight.w700), overflow: TextOverflow.ellipsis),
+                          SizedBox(
+                            width: 90,
+                            height: 30,
+                            child: RoundButton(title: tr('Open', 'فتح'), type: RoundButtonType.bgGradient, fontSize: 12, fontWeight: FontWeight.w400, onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const MealScheduleView()));
+                            }),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
